@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'tida-retail'
+    static_configs:
+      - targets: ['localhost:9100']  # Node Exporter
+      - targets: ['localhost:9104']  # MySQL Exporter
+      - targets: ['localhost:9121']  # Redis Exporter
+      - targets: ['localhost:9113']  # Nginx Exporter
+      - targets: ['localhost:9090']  # Prometheus itself
+
+  - job_name: 'application'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:8000']  # Application metrics endpoint
+
+  - job_name: 'queue'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:8001']  # Queue metrics endpoint
+
+rule_files:
+  - 'alert.rules.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093'] 

@@ -1,0 +1,17 @@
+[Unit]
+Description=Tida Retail Queue Worker
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+Restart=always
+RestartSec=3
+WorkingDirectory=/var/www/tida-retail
+ExecStart=/usr/bin/php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+StandardOutput=append:/var/www/tida-retail/storage/logs/queue.log
+StandardError=append:/var/www/tida-retail/storage/logs/queue-error.log
+
+[Install]
+WantedBy=multi-user.target 
