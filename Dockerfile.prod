@@ -33,13 +33,24 @@ COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 # Configure supervisor
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Create necessary directories
+# Create necessary directories with proper permissions
 RUN mkdir -p /var/log/supervisor \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/log/php-fpm \
+    && mkdir -p /var/run \
+    && touch /var/log/supervisor/supervisord.log \
+    && touch /var/log/nginx/error.log \
+    && touch /var/log/nginx/access.log \
+    && touch /var/log/php-fpm/error.log \
+    && touch /var/log/php-fpm/access.log \
     && chown -R www-data:www-data /var/log/supervisor \
     && chown -R www-data:www-data /var/log/nginx \
-    && chown -R www-data:www-data /var/log/php-fpm
+    && chown -R www-data:www-data /var/log/php-fpm \
+    && chown -R www-data:www-data /var/run \
+    && chmod -R 755 /var/log/supervisor \
+    && chmod -R 755 /var/log/nginx \
+    && chmod -R 755 /var/log/php-fpm \
+    && chmod -R 755 /var/run
 
 # Set working directory
 WORKDIR /var/www/html
