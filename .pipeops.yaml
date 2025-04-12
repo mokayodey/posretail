@@ -1,0 +1,73 @@
+name: posretail
+description: POS Retail API Service
+type: service
+runtime: php
+version: 8.2
+
+build:
+  dockerfile: Dockerfile.prod
+  context: .
+  args:
+    - APP_ENV=production
+    - APP_DEBUG=false
+    - APP_URL=https://posretail.pipeops.app
+
+deploy:
+  replicas: 1
+  resources:
+    cpu: 1000m
+    memory: 2Gi
+  strategy:
+    type: rolling
+    maxUnavailable: 0
+    maxSurge: 1
+
+env:
+  - name: APP_ENV
+    value: production
+  - name: APP_DEBUG
+    value: "false"
+  - name: APP_URL
+    value: https://posretail.pipeops.app
+  - name: DB_CONNECTION
+    value: mysql
+  - name: DB_HOST
+    value: winter-field.pleasant-way-production.svc.pipeops.internal
+  - name: DB_PORT
+    value: "3306"
+  - name: DB_DATABASE
+    value: pipeops
+  - name: DB_USERNAME
+    value: pipeops_user
+  - name: DB_PASSWORD
+    value: f8182a4a855070972a7f16529
+
+health:
+  path: /api/health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+ingress:
+  - host: posretail.pipeops.app
+    paths:
+      - path: /
+        servicePort: 80
+  - host: api.tidaretail.com
+    paths:
+      - path: /
+        servicePort: 80
+
+volumes:
+  - name: storage
+    mountPath: /var/www/html/storage
+    size: 10Gi
+  - name: logs
+    mountPath: /var/www/html/storage/logs
+    size: 5Gi
+
+cron:
+  - schedule: "0 2 * * *"
+    command: "/var/www/html/scripts/backup.sh" 
