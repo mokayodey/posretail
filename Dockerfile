@@ -26,6 +26,10 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Set working directory
 WORKDIR /var/www/posretail
 
+# Create necessary directories
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    && mkdir -p bootstrap/cache
+
 # Copy application files
 COPY . .
 
@@ -36,8 +40,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/posretail
-RUN chmod -R 775 storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/posretail \
+    && chmod -R 775 storage bootstrap/cache
 
 # Expose ports
 EXPOSE 80 9000
