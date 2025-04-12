@@ -1,4 +1,4 @@
-name: Tida Retail Cloud Deployment
+name: POS Retail Cloud Deployment
 
 on:
   push:
@@ -16,7 +16,7 @@ env:
   DB_PASSWORD: f8182a4a855070972a7f16529
   APP_ENV: production
   APP_DEBUG: false
-  APP_URL: https://api.tidaretail.com
+  APP_URL: https://posretail.pipeops.app
 
 jobs:
   deploy:
@@ -54,11 +54,11 @@ jobs:
         
     - name: Setup Directory Structure
       run: |
-        mkdir -p /var/www/tida-retail/public/api.tidaretail.com
-        mkdir -p /var/www/tida-retail/storage/logs
-        mkdir -p /var/www/tida-retail/storage/framework/{sessions,views,cache}
+        mkdir -p /var/www/pos-retail/public/posretail.pipeops.app
+        mkdir -p /var/www/pos-retail/storage/logs
+        mkdir -p /var/www/pos-retail/storage/framework/{sessions,views,cache}
         chmod -R 775 storage bootstrap/cache
-        chown -R www-data:www-data /var/www/tida-retail
+        chown -R www-data:www-data /var/www/pos-retail
         
     - name: Verify Database Connection
       run: |
@@ -90,22 +90,22 @@ jobs:
     - name: Setup Supervisor
       run: |
         sudo apt-get install supervisor
-        sudo cp .github/supervisor/tida-retail.conf /etc/supervisor/conf.d/
+        sudo cp .github/supervisor/pos-retail.conf /etc/supervisor/conf.d/
         sudo supervisorctl reread
         sudo supervisorctl update
         
     - name: Setup Nginx
       run: |
         sudo apt-get install nginx
-        sudo cp .github/nginx/tida-retail.conf /etc/nginx/sites-available/
-        sudo ln -s /etc/nginx/sites-available/tida-retail.conf /etc/nginx/sites-enabled/
+        sudo cp .github/nginx/pos-retail.conf /etc/nginx/sites-available/
+        sudo ln -s /etc/nginx/sites-available/pos-retail.conf /etc/nginx/sites-enabled/
         sudo nginx -t
         sudo systemctl restart nginx
         
     - name: Setup SSL
       run: |
         sudo apt-get install certbot python3-certbot-nginx
-        sudo certbot --nginx -d api.tidaretail.com --non-interactive --agree-tos --email admin@tidaretail.com
+        sudo certbot --nginx -d posretail.pipeops.app --non-interactive --agree-tos --email admin@posretail.pipeops.app
         
     - name: Setup Redis
       run: |
@@ -115,9 +115,9 @@ jobs:
         
     - name: Setup Queue Worker
       run: |
-        sudo cp .github/systemd/tida-retail-queue.service /etc/systemd/system/
-        sudo systemctl enable tida-retail-queue
-        sudo systemctl start tida-retail-queue
+        sudo cp .github/systemd/pos-retail-queue.service /etc/systemd/system/
+        sudo systemctl enable pos-retail-queue
+        sudo systemctl start pos-retail-queue
         
     - name: Setup Monitoring
       run: |
@@ -129,13 +129,13 @@ jobs:
         
     - name: Verify Deployment
       run: |
-        curl -I https://api.tidaretail.com/api/health || exit 1
-        curl -I https://api.tidaretail.com/api/status || exit 1
+        curl -I https://posretail.pipeops.app/api/health || exit 1
+        curl -I https://posretail.pipeops.app/api/metrics || exit 1
         
     - name: Setup Backup
       run: |
         chmod +x scripts/backup.sh
-        (crontab -l 2>/dev/null; echo "0 2 * * * /var/www/tida-retail/scripts/backup.sh") | crontab -
+        (crontab -l 2>/dev/null; echo "0 2 * * * /var/www/pos-retail/scripts/backup.sh") | crontab -
         
     - name: Notify Success
       if: success()
