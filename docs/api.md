@@ -1,4 +1,34 @@
-# UltimatePOS API Documentation
+# POS Retail API Documentation
+
+The API is available at: `https://posretail-api.pipeops.app/api/v1`
+
+> **Note**: During transition period, the old domain `https://api.tidaretail.com` is also supported.
+
+## Authentication
+
+All API requests require authentication using a Bearer token. Include the token in the Authorization header:
+
+```bash
+curl -H "Authorization: Bearer {token}" https://posretail-api.pipeops.app/api/v1/endpoint
+```
+
+## Endpoints
+
+### Health Check
+- **GET** `/health`
+  - Checks the health status of the API
+  - Returns 200 OK if healthy
+
+### Authentication
+- **POST** `/auth/login`
+  - Authenticate user and get access token
+  - Request body:
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "password"
+    }
+    ```
 
 ## Table of Contents
 1. [Authentication](#authentication)

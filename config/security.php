@@ -26,9 +26,9 @@ return [
     'cors' => [
         'enabled' => true,
         'paths' => ['api/*'],
-        'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        'allowed_origins' => ['https://posretail.pipeops.app'],
-        'allowed_headers' => ['*'],
+        'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        'allowed_origins' => ['https://posretail-api.pipeops.app'],
+        'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
         'exposed_headers' => ['Authorization'],
         'max_age' => 86400,
         'supports_credentials' => true,

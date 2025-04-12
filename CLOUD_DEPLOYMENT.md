@@ -73,11 +73,11 @@
 ## Environment Configuration
 
 ```env
-APP_NAME=TidaRetail
+APP_NAME="POS Retail"
 APP_ENV=production
-APP_KEY=
 APP_DEBUG=false
-APP_URL=https://api.tidaretail.com
+APP_URL=https://posretail-api.pipeops.app
+APP_KEY=base64:your_generated_key_here
 
 DB_CONNECTION=mysql
 DB_HOST=your-db-host
@@ -101,7 +101,7 @@ MAIL_PORT=587
 MAIL_USERNAME=your-smtp-user
 MAIL_PASSWORD=your-smtp-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=no-reply@api.tidaretail.com
+MAIL_FROM_ADDRESS=no-reply@posretail-api.pipeops.app
 MAIL_FROM_NAME="${APP_NAME}"
 
 AWS_ACCESS_KEY_ID=your-aws-key

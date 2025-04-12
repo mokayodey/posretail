@@ -1,148 +1,41 @@
-name: POS Retail Cloud Deployment
+name: Deploy to PipeOps
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 env:
-  LARAVEL_VERSION: 10.x
-  PHP_VERSION: 8.2
-  DB_HOST: winter-field.pleasant-way-production.svc.pipeops.internal
-  DB_PORT: 3306
-  DB_DATABASE: pipeops
-  DB_USERNAME: pipeops_user
-  DB_PASSWORD: f8182a4a855070972a7f16529
+  APP_URL: https://posretail-api.pipeops.app
   APP_ENV: production
-  APP_DEBUG: false
-  APP_URL: https://posretail.pipeops.app
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ env.PHP_VERSION }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, gd, redis
-        coverage: none
-        
-    - name: Install Dependencies
-      run: |
-        composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
-        
-    - name: Setup Environment
-      run: |
-        cp .env.example .env
-        sed -i "s/DB_HOST=.*/DB_HOST=${{ env.DB_HOST }}/" .env
-        sed -i "s/DB_PORT=.*/DB_PORT=${{ env.DB_PORT }}/" .env
-        sed -i "s/DB_DATABASE=.*/DB_DATABASE=${{ env.DB_DATABASE }}/" .env
-        sed -i "s/DB_USERNAME=.*/DB_USERNAME=${{ env.DB_USERNAME }}/" .env
-        sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${{ env.DB_PASSWORD }}/" .env
-        sed -i "s/APP_ENV=.*/APP_ENV=${{ env.APP_ENV }}/" .env
-        sed -i "s/APP_DEBUG=.*/APP_DEBUG=${{ env.APP_DEBUG }}/" .env
-        sed -i "s/APP_URL=.*/APP_URL=${{ env.APP_URL }}/" .env
-        
-    - name: Generate Application Key
-      run: |
-        php artisan key:generate
-        
-    - name: Setup Directory Structure
-      run: |
-        mkdir -p /var/www/pos-retail/public/posretail.pipeops.app
-        mkdir -p /var/www/pos-retail/storage/logs
-        mkdir -p /var/www/pos-retail/storage/framework/{sessions,views,cache}
-        chmod -R 775 storage bootstrap/cache
-        chown -R www-data:www-data /var/www/pos-retail
-        
-    - name: Verify Database Connection
-      run: |
-        php artisan db:monitor || exit 1
-        
-    - name: Execute Migrations
-      run: |
-        php artisan migrate --force --no-interaction
-        
-    - name: Execute Seeders
-      run: |
-        php artisan db:seed --force --no-interaction
-        
-    - name: Install Node Dependencies
-      run: |
-        npm install --production
-        
-    - name: Compile Assets
-      run: |
-        npm run production
-        
-    - name: Cache Configuration
-      run: |
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
-        php artisan event:cache
-        
-    - name: Setup Supervisor
-      run: |
-        sudo apt-get install supervisor
-        sudo cp .github/supervisor/pos-retail.conf /etc/supervisor/conf.d/
-        sudo supervisorctl reread
-        sudo supervisorctl update
-        
-    - name: Setup Nginx
-      run: |
-        sudo apt-get install nginx
-        sudo cp .github/nginx/pos-retail.conf /etc/nginx/sites-available/
-        sudo ln -s /etc/nginx/sites-available/pos-retail.conf /etc/nginx/sites-enabled/
-        sudo nginx -t
-        sudo systemctl restart nginx
-        
-    - name: Setup SSL
-      run: |
-        sudo apt-get install certbot python3-certbot-nginx
-        sudo certbot --nginx -d posretail.pipeops.app --non-interactive --agree-tos --email admin@posretail.pipeops.app
-        
-    - name: Setup Redis
-      run: |
-        sudo apt-get install redis-server
-        sudo systemctl enable redis-server
-        sudo systemctl start redis-server
-        
-    - name: Setup Queue Worker
-      run: |
-        sudo cp .github/systemd/pos-retail-queue.service /etc/systemd/system/
-        sudo systemctl enable pos-retail-queue
-        sudo systemctl start pos-retail-queue
-        
-    - name: Setup Monitoring
-      run: |
-        sudo apt-get install prometheus node-exporter
-        sudo systemctl enable prometheus
-        sudo systemctl enable node-exporter
-        sudo systemctl start prometheus
-        sudo systemctl start node-exporter
-        
-    - name: Verify Deployment
-      run: |
-        curl -I https://posretail.pipeops.app/api/health || exit 1
-        curl -I https://posretail.pipeops.app/api/metrics || exit 1
-        
-    - name: Setup Backup
-      run: |
-        chmod +x scripts/backup.sh
-        (crontab -l 2>/dev/null; echo "0 2 * * * /var/www/pos-retail/scripts/backup.sh") | crontab -
-        
-    - name: Notify Success
-      if: success()
-      run: |
-        echo "Deployment completed successfully!"
-        
-    - name: Notify Failure
-      if: failure()
-      run: |
-        echo "Deployment failed! Check the logs for details." 
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build assets
+        run: npm run production
+
+      - name: Configure environment
+        run: |
+          cp .env.example .env
+          sed -i "s/APP_ENV=.*/APP_ENV=${{ env.APP_ENV }}/" .env
+          sed -i "s/APP_URL=.*/APP_URL=${{ env.APP_URL }}/" .env
+
+      - name: Deploy to PipeOps
+        uses: pipeops/pipeops-deploy@v1
+        with:
+          token: ${{ secrets.PIPEOPS_TOKEN }}
+          project: pos-retail
+          environment: production 

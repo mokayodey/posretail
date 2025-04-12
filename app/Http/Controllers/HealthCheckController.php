@@ -74,4 +74,16 @@ class HealthCheckController extends Controller
 
         return response()->json($metrics);
     }
+
+    public function sendNotification()
+    {
+        $health = $this->checkHealth();
+        
+        Mail::send('emails.health', ['health' => $health], function($message) {
+            $message->to('health@posretail-api.pipeops.app')
+                    ->subject('Health Check Notification');
+        });
+        
+        return response()->json(['message' => 'Notification sent']);
+    }
 } 

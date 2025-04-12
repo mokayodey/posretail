@@ -2,14 +2,13 @@
 
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    'allowed_methods' => ['*'],
     'allowed_origins' => [
-        'https://posretail.pipeops.app',
-        'https://api.tidaretail.com', // During transition period
-        'http://localhost:3000', // For local development
+        'https://posretail-api.pipeops.app',
     ],
+    'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
-    'exposed_headers' => ['Authorization'],
-    'max_age' => 86400, // 24 hours
-    'supports_credentials' => true,
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => false,
 ]; 
