@@ -1,11 +1,3 @@
-# Build stage
-FROM node:16-alpine as build-stage
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run production
-
 # Production stage
 FROM php:8.2-fpm-alpine
 
@@ -17,9 +9,7 @@ RUN apk add --no-cache \
     libzip-dev \
     oniguruma-dev \
     libxml2-dev \
-    mysql-client \
-    nodejs \
-    npm
+    mysql-client
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
@@ -37,7 +27,6 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 WORKDIR /var/www/posretail
 
 # Copy application files
-COPY --from=build-stage /app/public /var/www/posretail/public/api.posretail.com
 COPY . .
 
 # Install Composer
@@ -45,7 +34,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install --production
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/posretail
