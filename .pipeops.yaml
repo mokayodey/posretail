@@ -29,6 +29,10 @@ env:
     value: "false"
   - name: APP_URL
     value: https://posretail.pipeops.app
+  - name: APP_NAME
+    value: PosRetail
+  
+  # Database Configuration
   - name: DB_CONNECTION
     value: mysql
   - name: DB_HOST
@@ -41,6 +45,26 @@ env:
     value: pipeops_user
   - name: DB_PASSWORD
     value: f8182a4a855070972a7f16529
+
+  # Optional Payment Integrations (Disabled by default)
+  - name: MONIEPOINT_ENABLED
+    value: "false"
+  - name: MONIEPOINT_BASE_URL
+    value: https://api.moniepoint.com/v1
+  - name: MONIEPOINT_API_KEY
+    value: ""
+  - name: MONIEPOINT_SECRET_KEY
+    value: ""
+
+  # Optional Gift Card Integration (Disabled by default)
+  - name: SUREGIFTS_ENABLED
+    value: "false"
+  - name: SUREGIFTS_BASE_URL
+    value: https://api.suregifts.com.ng/v1
+  - name: SUREGIFTS_API_KEY
+    value: ""
+  - name: SUREGIFTS_SECRET_KEY
+    value: ""
 
 health:
   path: /api/health
