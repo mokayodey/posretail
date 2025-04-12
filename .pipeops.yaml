@@ -1,4 +1,4 @@
-name: posretail
+name: posretail-api
 description: POS Retail API Service
 type: service
 runtime: php
