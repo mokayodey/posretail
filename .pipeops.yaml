@@ -10,7 +10,7 @@ build:
   args:
     - APP_ENV=production
     - APP_DEBUG=false
-    - APP_URL=https://posretail.pipeops.app
+    - APP_URL=https://posretail-api.pipeops.app
 
 deploy:
   replicas: 1
@@ -45,7 +45,7 @@ env:
   - name: APP_DEBUG
     value: "false"
   - name: APP_URL
-    value: https://posretail.pipeops.app
+    value: https://posretail-api.pipeops.app
   - name: APP_NAME
     value: PosRetail
   
@@ -92,7 +92,7 @@ health:
   failureThreshold: 3
 
 ingress:
-  - host: posretail.pipeops.app
+  - host: posretail-api.pipeops.app
     paths:
       - path: /
         servicePort: 80
