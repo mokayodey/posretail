@@ -27,7 +27,7 @@ return [
         'enabled' => true,
         'paths' => ['api/*'],
         'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        'allowed_origins' => ['https://api.tidaretail.com', 'https://tidaretail.com'],
+        'allowed_origins' => ['https://posretail.pipeops.app'],
         'allowed_headers' => ['*'],
         'exposed_headers' => ['Authorization'],
         'max_age' => 86400,
@@ -63,7 +63,7 @@ return [
         'secure' => true,
         'http_only' => true,
         'same_site' => 'lax',
-        'cookie' => 'tida_session',
+        'cookie' => 'posretail_session',
     ],
 
     'sanitization' => [

@@ -4,8 +4,7 @@ return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     'allowed_origins' => [
-        'https://api.tidaretail.com',
-        'https://tidaretail.com',
+        'https://posretail.pipeops.app',
         'http://localhost:3000', // For local development
     ],
     'allowed_headers' => ['*'],
