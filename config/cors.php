@@ -5,6 +5,7 @@ return [
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     'allowed_origins' => [
         'https://posretail.pipeops.app',
+        'https://api.tidaretail.com', // During transition period
         'http://localhost:3000', // For local development
     ],
     'allowed_headers' => ['*'],

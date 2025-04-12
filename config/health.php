@@ -1,26 +1,31 @@
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Health Check Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This file contains the configuration for the health check system.
+    |
+    */
+
     'checkers' => [
         'database' => [
             'enabled' => true,
-            'connection' => 'mysql',
-            'timeout' => 5,
+            'connection' => env('DB_CONNECTION', 'mysql'),
         ],
         'cache' => [
             'enabled' => true,
-            'store' => 'redis',
-            'timeout' => 5,
+            'driver' => env('CACHE_DRIVER', 'file'),
         ],
         'redis' => [
             'enabled' => true,
-            'connection' => 'default',
-            'timeout' => 5,
+            'connection' => env('REDIS_CONNECTION', 'default'),
         ],
         'mail' => [
             'enabled' => true,
-            'mailer' => 'smtp',
-            'timeout' => 5,
+            'driver' => env('MAIL_MAILER', 'smtp'),
         ],
     ],
 
@@ -28,24 +33,17 @@ return [
         'enabled' => true,
         'channels' => ['mail', 'slack'],
         'mail' => [
-            'to' => 'admin@posretail.pipeops.app',
-            'from' => 'health@posretail.pipeops.app',
+            'to' => env('HEALTH_NOTIFICATION_EMAIL', 'admin@posretail.pipeops.app'),
         ],
         'slack' => [
-            'webhook_url' => env('SLACK_WEBHOOK_URL'),
-            'channel' => '#health',
+            'webhook_url' => env('HEALTH_SLACK_WEBHOOK_URL'),
         ],
-    ],
-
-    'cache' => [
-        'enabled' => true,
-        'store' => 'redis',
-        'key' => 'health:status',
-        'ttl' => 300, // 5 minutes
     ],
 
     'endpoints' => [
-        'health' => '/api/v1/health',
-        'status' => '/api/v1/status',
+        'health' => '/health',
+        'metrics' => '/metrics',
     ],
+
+    'domain' => env('APP_URL', 'https://posretail.pipeops.app'),
 ]; 

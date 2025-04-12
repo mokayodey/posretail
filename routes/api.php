@@ -13,13 +13,13 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\HealthCheckController;
 
 // API Versioning
 Route::prefix('v1')->group(function () {
     // Health Check
-    Route::get('/health', function () {
-        return response()->json(['status' => 'healthy']);
-    });
+    Route::get('/health', [HealthCheckController::class, 'check']);
+    Route::get('/metrics', [HealthCheckController::class, 'metrics']);
 
     // API Documentation
     Route::get('/docs', function () {
