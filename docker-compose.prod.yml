@@ -4,14 +4,14 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.prod
-    container_name: tida-retail-app
+      dockerfile: Dockerfile
+    container_name: posretail-app
     restart: unless-stopped
     networks:
-      - tida-retail
+      - posretail
     volumes:
-      - ./:/var/www/tida-retail
-      - tida-retail-storage:/var/www/tida-retail/storage
+      - ./:/var/www/posretail
+      - posretail-storage:/var/www/posretail/storage
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
@@ -26,15 +26,15 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: tida-retail-redis
+    container_name: posretail-redis
     restart: unless-stopped
     networks:
-      - tida-retail
+      - posretail
 
 networks:
-  tida-retail:
+  posretail:
     driver: bridge
 
 volumes:
-  tida-retail-storage:
+  posretail-storage:
     driver: local 
