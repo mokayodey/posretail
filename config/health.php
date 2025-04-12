@@ -43,7 +43,7 @@ return [
         'enabled' => true,
         'channels' => ['mail', 'slack'],
         'recipients' => [
-            'mail' => 'admin@your-domain.com',
+            'mail' => 'admin@api.tidaretail.com',
             'slack' => 'https://hooks.slack.com/services/your-webhook',
         ],
     ],

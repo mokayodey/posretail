@@ -69,7 +69,7 @@ sudo apt install -y nginx mysql-server php8.2-fpm php8.2-mysql php8.2-xml php8.2
 ### 1. Set Up the Application Directory
 ```bash
 # Create directory
-sudo mkdir -p /var/www/tida-retail
+sudo mkdir -p /var/www/tida-retail/public/api.tidaretail.com
 sudo chown -R $USER:$USER /var/www/tida-retail
 
 # Clone your repository
@@ -92,8 +92,8 @@ Create a new file at `/etc/nginx/sites-available/tida-retail`:
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
-    root /var/www/tida-retail/public;
+    server_name api.tidaretail.com;
+    root /var/www/tida-retail/public/api.tidaretail.com;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -132,38 +132,39 @@ sudo systemctl restart nginx
 
 ## Configuring the Database
 
-### 1. Set Up MySQL
-```bash
-sudo mysql_secure_installation
-```
+### 1. PipeOps Database Setup
+The application uses a managed MySQL database provided by PipeOps. The database is already configured with the following details:
 
-### 2. Create Database and User
-```bash
-sudo mysql
-```
-```sql
-CREATE DATABASE tida_retail;
-CREATE USER 'tida_user'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON tida_retail.* TO 'tida_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-### 3. Update Environment File
-Edit `.env`:
 ```env
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=winter-field.pleasant-way-production.svc.pipeops.internal
 DB_PORT=3306
-DB_DATABASE=tida_retail
-DB_USERNAME=tida_user
-DB_PASSWORD=your_password
+DB_DATABASE=pipeops
+DB_USERNAME=pipeops_user
+DB_PASSWORD=f8182a4a855070972a7f16529
 ```
 
-### 4. Run Migrations
+### 2. Verify Database Connection
 ```bash
+# Test database connection
+php artisan db:monitor
+
+# Run migrations
 php artisan migrate
+
+# Seed the database
 php artisan db:seed
+```
+
+### 3. Database Backup
+Since we're using PipeOps, database backups are managed automatically. However, you can still create manual backups:
+
+```bash
+# Export database
+mysqldump -h winter-field.pleasant-way-production.svc.pipeops.internal -u pipeops_user -p'f8182a4a855070972a7f16529' pipeops > backup.sql
+
+# Import database
+mysql -h winter-field.pleasant-way-production.svc.pipeops.internal -u pipeops_user -p'f8182a4a855070972a7f16529' pipeops < backup.sql
 ```
 
 ## Setting Up SSL
@@ -175,7 +176,7 @@ sudo apt install certbot python3-certbot-nginx
 
 ### 2. Get SSL Certificate
 ```bash
-sudo certbot --nginx -d your-domain.com
+sudo certbot --nginx -d api.tidaretail.com
 ```
 
 ## Making the API Accessible
@@ -197,7 +198,7 @@ return [
 ### 2. Set Up API Routes
 Your API routes are already configured in `routes/api.php`. They will be accessible at:
 ```
-https://your-domain.com/api/v1/...
+https://api.tidaretail.com/api/v1/...
 ```
 
 ## Connecting the Frontend
@@ -205,7 +206,7 @@ https://your-domain.com/api/v1/...
 ### 1. Set Up Environment Variables
 Create a `.env` file in your frontend project:
 ```env
-VITE_API_URL=https://your-domain.com/api/v1
+VITE_API_URL=https://api.tidaretail.com/api/v1
 VITE_APP_NAME=TidaRetail
 ```
 

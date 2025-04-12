@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: tida-retail-app
+    restart: unless-stopped
+    networks:
+      - tida-retail
+    volumes:
+      - ./:/var/www/tida-retail
+      - tida-retail-storage:/var/www/tida-retail/storage
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=winter-field.pleasant-way-production.svc.pipeops.internal
+      - DB_PORT=3306
+      - DB_DATABASE=pipeops
+      - DB_USERNAME=pipeops_user
+      - DB_PASSWORD=f8182a4a855070972a7f16529
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: tida-retail-redis
+    restart: unless-stopped
+    networks:
+      - tida-retail
+
+networks:
+  tida-retail:
+    driver: bridge
+
+volumes:
+  tida-retail-storage:
+    driver: local 

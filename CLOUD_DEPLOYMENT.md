@@ -77,7 +77,7 @@ APP_NAME=TidaRetail
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=https://your-domain.com
+APP_URL=https://api.tidaretail.com
 
 DB_CONNECTION=mysql
 DB_HOST=your-db-host
@@ -101,7 +101,7 @@ MAIL_PORT=587
 MAIL_USERNAME=your-smtp-user
 MAIL_PASSWORD=your-smtp-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=no-reply@your-domain.com
+MAIL_FROM_ADDRESS=no-reply@api.tidaretail.com
 MAIL_FROM_NAME="${APP_NAME}"
 
 AWS_ACCESS_KEY_ID=your-aws-key

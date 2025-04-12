@@ -1,30 +1,34 @@
 #!/bin/bash
 
-# Configuration
-BACKUP_DIR="/var/backups/tida-retail"
-DB_USER="your-db-user"
-DB_PASS="your-db-password"
-DB_NAME="tida_retail"
-APP_DIR="/var/www/tida-retail"
+# Set variables
+BACKUP_DIR="/var/www/tida-retail/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
+DB_HOST="winter-field.pleasant-way-production.svc.pipeops.internal"
+DB_USER="pipeops_user"
+DB_PASS="f8182a4a855070972a7f16529"
+DB_NAME="pipeops"
 
 # Create backup directory if it doesn't exist
 mkdir -p $BACKUP_DIR
 
-# Database backup
-echo "Creating database backup..."
-mysqldump -u$DB_USER -p$DB_PASS $DB_NAME | gzip > $BACKUP_DIR/db_backup_$DATE.sql.gz
+# Create database backup
+mysqldump -h $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME > $BACKUP_DIR/db_backup_$DATE.sql
 
-# Application files backup
-echo "Creating application files backup..."
-tar -czf $BACKUP_DIR/app_backup_$DATE.tar.gz $APP_DIR
+# Compress the backup
+gzip $BACKUP_DIR/db_backup_$DATE.sql
 
-# Cleanup old backups (keep last 7 days)
+# Backup application files
+tar -czf $BACKUP_DIR/app_backup_$DATE.tar.gz /var/www/tida-retail
+
+# Remove backups older than 7 days
 find $BACKUP_DIR -type f -mtime +7 -delete
 
+# Log the backup
+echo "Backup completed at $(date)" >> $BACKUP_DIR/backup.log
+
 # Sync to remote storage (if configured)
-if [ -f "$APP_DIR/.env" ]; then
-    source $APP_DIR/.env
+if [ -f "/var/www/tida-retail/.env" ]; then
+    source /var/www/tida-retail/.env
     if [ ! -z "$AWS_ACCESS_KEY_ID" ] && [ ! -z "$AWS_SECRET_ACCESS_KEY" ]; then
         echo "Syncing backups to S3..."
         aws s3 sync $BACKUP_DIR s3://$AWS_BUCKET/backups/

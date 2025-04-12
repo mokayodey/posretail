@@ -9,6 +9,14 @@ on:
 env:
   LARAVEL_VERSION: 10.x
   PHP_VERSION: 8.2
+  DB_HOST: winter-field.pleasant-way-production.svc.pipeops.internal
+  DB_PORT: 3306
+  DB_DATABASE: pipeops
+  DB_USERNAME: pipeops_user
+  DB_PASSWORD: f8182a4a855070972a7f16529
+  APP_ENV: production
+  APP_DEBUG: false
+  APP_URL: https://api.tidaretail.com
 
 jobs:
   deploy:
@@ -28,33 +36,45 @@ jobs:
       run: |
         composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
         
-    - name: Copy Environment File
+    - name: Setup Environment
       run: |
         cp .env.example .env
+        sed -i "s/DB_HOST=.*/DB_HOST=${{ env.DB_HOST }}/" .env
+        sed -i "s/DB_PORT=.*/DB_PORT=${{ env.DB_PORT }}/" .env
+        sed -i "s/DB_DATABASE=.*/DB_DATABASE=${{ env.DB_DATABASE }}/" .env
+        sed -i "s/DB_USERNAME=.*/DB_USERNAME=${{ env.DB_USERNAME }}/" .env
+        sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${{ env.DB_PASSWORD }}/" .env
+        sed -i "s/APP_ENV=.*/APP_ENV=${{ env.APP_ENV }}/" .env
+        sed -i "s/APP_DEBUG=.*/APP_DEBUG=${{ env.APP_DEBUG }}/" .env
+        sed -i "s/APP_URL=.*/APP_URL=${{ env.APP_URL }}/" .env
         
     - name: Generate Application Key
       run: |
         php artisan key:generate
         
-    - name: Directory Permissions
+    - name: Setup Directory Structure
       run: |
+        mkdir -p /var/www/tida-retail/public/api.tidaretail.com
+        mkdir -p /var/www/tida-retail/storage/logs
+        mkdir -p /var/www/tida-retail/storage/framework/{sessions,views,cache}
         chmod -R 775 storage bootstrap/cache
+        chown -R www-data:www-data /var/www/tida-retail
         
-    - name: Create Database
+    - name: Verify Database Connection
       run: |
-        mysql -e 'CREATE DATABASE IF NOT EXISTS tida_retail;'
+        php artisan db:monitor || exit 1
         
     - name: Execute Migrations
       run: |
-        php artisan migrate --force
+        php artisan migrate --force --no-interaction
         
     - name: Execute Seeders
       run: |
-        php artisan db:seed --force
+        php artisan db:seed --force --no-interaction
         
     - name: Install Node Dependencies
       run: |
-        npm install
+        npm install --production
         
     - name: Compile Assets
       run: |
@@ -65,6 +85,7 @@ jobs:
         php artisan config:cache
         php artisan route:cache
         php artisan view:cache
+        php artisan event:cache
         
     - name: Setup Supervisor
       run: |
@@ -84,7 +105,7 @@ jobs:
     - name: Setup SSL
       run: |
         sudo apt-get install certbot python3-certbot-nginx
-        sudo certbot --nginx -d your-domain.com
+        sudo certbot --nginx -d api.tidaretail.com --non-interactive --agree-tos --email admin@tidaretail.com
         
     - name: Setup Redis
       run: |
@@ -96,4 +117,32 @@ jobs:
       run: |
         sudo cp .github/systemd/tida-retail-queue.service /etc/systemd/system/
         sudo systemctl enable tida-retail-queue
-        sudo systemctl start tida-retail-queue 
+        sudo systemctl start tida-retail-queue
+        
+    - name: Setup Monitoring
+      run: |
+        sudo apt-get install prometheus node-exporter
+        sudo systemctl enable prometheus
+        sudo systemctl enable node-exporter
+        sudo systemctl start prometheus
+        sudo systemctl start node-exporter
+        
+    - name: Verify Deployment
+      run: |
+        curl -I https://api.tidaretail.com/api/health || exit 1
+        curl -I https://api.tidaretail.com/api/status || exit 1
+        
+    - name: Setup Backup
+      run: |
+        chmod +x scripts/backup.sh
+        (crontab -l 2>/dev/null; echo "0 2 * * * /var/www/tida-retail/scripts/backup.sh") | crontab -
+        
+    - name: Notify Success
+      if: success()
+      run: |
+        echo "Deployment completed successfully!"
+        
+    - name: Notify Failure
+      if: failure()
+      run: |
+        echo "Deployment failed! Check the logs for details." 
